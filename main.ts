@@ -1,79 +1,85 @@
-// ai-excited-01 entrypoint — delivers entry.png, nothing else.
+// ai-excited-01 — entrypoint. One job: deliver entry.png untouched.
 //
-// The picture: a humpback whale the size of the room bursting out of a small
-// framed seascape painting in a sunlit gallery, spray flying, a boy below
-// reaching up. The judge grades the image, so this program's only job is to
-// hand those exact bytes to the output directory, refusing anything that
-// would trip the competition gate (1 MiB, 1024x1024) and proving the copy
-// matches the source byte for byte before it exits.
+// The image: a humpback whale the size of the room breaching out of a small
+// framed seascape painting in a sunlit gallery. Seawater bursts into spray,
+// the painted sea stays flat inside the frame, and a boy below reaches up
+// toward the whale. The judge scores the picture, so this program is a
+// courier, not an artist: it copies the exact bytes into the output
+// directory, checks them against the competition gate (whole JPEG, at most
+// 1 MiB and 1024x1024 px), and proves the copy matches the source with
+// sha256 before it prints anything and exits.
 //
-// Anchor (drand round 33993421, emitted 2026-11-15T23:00:27Z, after the
-// competition opened): ac2ef141f21651e962ede1b7a1576dda1bc02e60
+// Anchor — drand round 33993421, emitted 2026-11-15T23:00:27Z, after the
+// competition opened: ac2ef141f21651e962ede1b7a1576dda1bc02e60
 //
-// Local check: mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+// Try it: mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
 import { copyFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 
-const SOURCE = new URL('./entry.png', import.meta.url);
-const DEST_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-const DEST = join(DEST_DIR, 'entry.png');
+const IMAGE = new URL('./entry.png', import.meta.url);
+const OUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const OUT_FILE = join(OUT_DIR, 'entry.png');
 
-// Competition gate: a whole PNG or JPEG, at most 1 MiB and 1024x1024 px.
-const BYTE_LIMIT = 1024 * 1024;
-const SIDE_LIMIT = 1024;
+// The competition gate, in bytes and pixels.
+const MAX_BYTES = 1024 * 1024;
+const MAX_EDGE = 1024;
 
-function digest(bytes: Buffer): string {
-  return createHash('sha256').update(bytes).digest('hex');
+function sha256(data: Buffer): string {
+  return createHash('sha256').update(data).digest('hex');
 }
 
-// JPEG size lives in the Start-Of-Frame segment. Scan the marker stream
-// starting just past the SOI marker (ffd8); every non-SOF segment is jumped
-// over using its own two-byte length field. SOF0 (c0) and SOF2 (c2) both
-// carry width/height in the same layout.
-function readJpegSize(bytes: Buffer): { width: number; height: number } {
-  if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) {
-    throw new Error('entry.png is not a JPEG (missing SOI marker)');
+// A JPEG's width and height sit in its Start-Of-Frame segment. Walk the
+// marker stream from just after the SOI bytes (ff d8): standalone markers
+// (SOI, RSTn, TEM) are two bytes and carry no length, every other segment
+// announces its own length, so we can skip it. SOF0 (c0) and SOF2 (c2)
+// store height then width, big-endian, five and seven bytes past the
+// marker.
+function jpegSize(data: Buffer): { w: number; h: number } {
+  if (data.length < 4 || data[0] !== 0xff || data[1] !== 0xd8) {
+    throw new Error('entry.png is not a JPEG: no SOI marker');
   }
-  let at = 2;
-  while (at + 9 <= bytes.length) {
-    if (bytes[at] !== 0xff) {
-      at += 1;
+  let i = 2;
+  while (i + 9 <= data.length) {
+    if (data[i] !== 0xff) {
+      i += 1;
       continue;
     }
-    const marker = bytes[at + 1];
-    if (marker === 0xc0 || marker === 0xc2) {
-      return { height: bytes.readUInt16BE(at + 5), width: bytes.readUInt16BE(at + 7) };
+    const tag = data[i + 1];
+    if (tag === 0xc0 || tag === 0xc2) {
+      return { h: data.readUInt16BE(i + 5), w: data.readUInt16BE(i + 7) };
     }
-    if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
-      at += 2;
+    if (tag === 0xd8 || tag === 0x01 || (tag >= 0xd0 && tag <= 0xd7)) {
+      i += 2;
       continue;
     }
-    at += 2 + bytes.readUInt16BE(at + 2);
+    i += 2 + data.readUInt16BE(i + 2);
   }
-  throw new Error('entry.png has no JPEG Start-Of-Frame segment');
+  throw new Error('entry.png has no Start-Of-Frame segment');
 }
 
-const bytes = readFileSync(SOURCE);
-if (bytes.length > BYTE_LIMIT) {
-  throw new Error(`entry.png is ${bytes.length} bytes, over the 1 MiB gate`);
+const original = readFileSync(IMAGE);
+if (original.length > MAX_BYTES) {
+  throw new Error(`entry.png is ${original.length} bytes, over the 1 MiB limit`);
 }
 
-const { width, height } = readJpegSize(bytes);
-if (width > SIDE_LIMIT || height > SIDE_LIMIT) {
-  throw new Error(`entry.png is ${width}x${height}, over the ${SIDE_LIMIT}x${SIDE_LIMIT} gate`);
+const { w, h } = jpegSize(original);
+if (w > MAX_EDGE || h > MAX_EDGE) {
+  throw new Error(`entry.png is ${w}x${h}, over the ${MAX_EDGE}x${MAX_EDGE} limit`);
 }
 
-mkdirSync(dirname(DEST), { recursive: true });
-copyFileSync(SOURCE, DEST);
+mkdirSync(dirname(OUT_FILE), { recursive: true });
+copyFileSync(IMAGE, OUT_FILE);
 
-const copied = readFileSync(DEST);
-if (copied.length !== bytes.length) {
-  throw new Error(`entry.png copy is ${copied.length} bytes, expected ${bytes.length}`);
+const delivered = readFileSync(OUT_FILE);
+if (delivered.length !== original.length) {
+  throw new Error(`copied entry.png is ${delivered.length} bytes, expected ${original.length}`);
 }
-if (digest(copied) !== digest(bytes)) {
-  throw new Error('entry.png copy failed its sha256 integrity check');
+if (sha256(delivered) !== sha256(original)) {
+  throw new Error('copied entry.png failed the sha256 check');
 }
 
-console.log(`delivered entry.png ${width}x${height}, ${bytes.length} bytes, sha256 ${digest(bytes)}`);
+// Exit 0 with the hash on stdout: the harness runs this program twice and
+// expects the same bytes both times.
+console.log(`delivered entry.png ${w}x${h}, ${original.length} bytes, sha256 ${sha256(original)}`);
