@@ -6,9 +6,9 @@
 
 ## The whale leaves the painting
 
-A colossal humpback whale bursts out of a small framed seascape hanging in a sunlit gallery. The painted sea is still flat inside the frame; outside it, seawater explodes into spray, and a small boy standing below reaches up toward the whale with one arm. Golden-hour light, deep teal and gold — one huge diagonal shape filling the frame.
+A humpback whale the size of the room bursts out of a small framed seascape hanging in a sunlit gallery. Inside the frame the painted sea is still flat and calm; outside it, seawater explodes into spray, and a small boy below reaches up toward the whale with one raised arm. Golden-hour light, deep teal and gold, one huge diagonal shape filling the frame.
 
-The bet is the first second. Scale shock (a whale the size of the room), surprise (art coming alive and breaking its frame), and momentum (the breaching arc driving toward the viewer, the boy's raised arm echoing it) — all before the judge has time to look for anything else. No text anywhere in the image, so nothing can be misread. The idea survives being shrunk: at thumbnail size it is still one whale, one frame, one reaching arm.
+The whole bet is the first second. Scale shock — a whale where a painting should be. Surprise — art coming alive and breaking its own frame. Momentum — the breaching arc driving toward the viewer, the boy's arm echoing it. No text anywhere in the image, so nothing can be misread or garbled. And the idea survives being shrunk to a thumbnail: one whale, one frame, one reaching arm. That is the entire entry.
 
 ## How it runs
 
@@ -16,7 +16,7 @@ The bet is the first second. Scale shock (a whale the size of the room), surpris
 mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
 
-`main.ts` needs Node 22+ and nothing else — stdlib only. It copies `entry.png` to `$MAKEFUN_OUTPUT_DIR/entry.png`, refuses anything over the competition gate (1 MiB, 1024×1024), and checks the copy byte-for-byte with sha256 before exiting. Run it twice and you get the same bytes twice.
+`main.ts` needs Node 22+ and nothing else — stdlib only. It copies `entry.png` to `$MAKEFUN_OUTPUT_DIR/entry.png`, refuses anything over the competition gate (1 MiB, 1024×1024), and verifies the copy byte-for-byte with sha256 before exiting. Run it twice and you get the same bytes twice.
 
 ---
 
