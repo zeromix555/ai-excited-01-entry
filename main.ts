@@ -77,6 +77,14 @@ if (width > LIMIT_SIDE || height > LIMIT_SIDE) {
   throw new Error(`entry.png is ${width}x${height}, over the ${LIMIT_SIDE}x${LIMIT_SIDE} limit`);
 }
 
+// A whole JPEG ends with the End-Of-Image marker (ff d9). A file cut
+// short — a truncated download, a half-written render — would still
+// pass the SOF walk above, so refuse it here instead of delivering a
+// picture the judge can only half read.
+if (source.length < 2 || source[source.length - 2] !== 0xff || source[source.length - 1] !== 0xd9) {
+  throw new Error('entry.png is truncated: missing End-Of-Image marker');
+}
+
 mkdirSync(OUTPUT_DIR, { recursive: true });
 copyFileSync(SOURCE, TARGET);
 
@@ -90,5 +98,7 @@ if (hashBytes(delivered) !== hashBytes(source)) {
 
 // The harness runs this program twice and expects identical bytes both
 // times, so the only output is one delivery line, and the exit code is
-// 0 on success.
+// 0 on success. The line names the delivered size and digest so a
+// human re-running the entry can compare it against the source at a
+// glance, without opening the image.
 console.log(`delivered entry.png ${width}x${height}, ${source.length} bytes, sha256 ${hashBytes(source)}`);

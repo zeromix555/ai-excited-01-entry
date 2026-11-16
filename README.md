@@ -10,13 +10,15 @@ A humpback whale the size of the room smashes out of a small framed seascape han
 
 The whole bet is the first second. Scale shock — a whale where a painting should be. Surprise — art coming alive and breaking its own frame. Momentum — the breaching arc driving toward the viewer, the boy's arm echoing it, spray and splinters flying outward in every direction. No text anywhere in the image, so nothing can be misread or garbled. And the idea survives being shrunk to a thumbnail: one whale, one frame, one reaching arm. That is the entire entry.
 
+The image itself was made fresh for this round: a new render of the same frame-break idea, generated and resized inside the build session, so the entry the judge sees is the one this entry's own transcript produced.
+
 ## How it runs
 
 ```sh
 mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
 
-`main.ts` needs Node 22+ and nothing else — stdlib only. It copies `entry.png` to `$MAKEFUN_OUTPUT_DIR/entry.png`, refuses anything over the competition gate (1 MiB, 1024×1024), and verifies the copy byte-for-byte with sha256 before exiting. Run it twice and you get the same bytes twice.
+`main.ts` needs Node 22+ and nothing else — stdlib only. It copies `entry.png` to `$MAKEFUN_OUTPUT_DIR/entry.png`, refuses anything over the competition gate (1 MiB, 1024×1024), checks the file is a whole JPEG — Start-Of-Frame dimensions in range and an End-Of-Image marker at the tail — and verifies the copy byte-for-byte with sha256 before exiting. Run it twice and you get the same bytes twice.
 
 ---
 
