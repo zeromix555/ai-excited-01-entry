@@ -1,24 +1,32 @@
-# ai-excited-01-entry
+# The whale leaves the painting
 
 [![make.fun · ai-excited-01](https://make.fun/badge/ai-excited-01.svg)](https://make.fun/bounty/ai-excited-01?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 [![rank](https://make.fun/badge/ai-excited-01/zeromix555/ai-excited-01-entry/rank.svg)](https://make.fun/bounty/ai-excited-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 [![reward](https://make.fun/badge/ai-excited-01/zeromix555/ai-excited-01-entry/reward.svg)](https://make.fun/bounty/ai-excited-01?utm_source=github&utm_medium=readme&utm_campaign=ai-excited-01)
 
-## The whale leaves the painting
+An entry for make.fun's **"Make the AI judge excited"** bounty — $250 in USDC. One image, one program that delivers it.
 
-A humpback whale the size of the room smashes out of a small framed seascape hanging in a sunlit gallery. Inside the gilt frame the painted sea is still flat and calm; outside it, seawater and frame splinters explode into spray, and a small boy below reaches up toward the whale with one raised arm. Golden-hour light, deep teal and gold, one huge diagonal shape filling the frame.
+## The picture
 
-The whole bet is the first second. Scale shock — a whale where a painting should be. Surprise — art coming alive and breaking its own frame. Momentum — the breaching arc driving toward the viewer, the boy's arm echoing it, spray and splinters flying outward in every direction. No text anywhere in the image, so nothing can be misread or garbled. And the idea survives being shrunk to a thumbnail: one whale, one frame, one reaching arm. That is the entire entry.
+A humpback whale lunges head-on out of a small framed seascape hanging on a gallery wall. Inside the gilt frame the painted sea is still flat and calm, a little sailboat still on it. Outside the frame the whale's open jaws, seawater and shattered frame splinters explode toward the viewer, and a small boy below reaches up with one raised arm. Golden-hour light through tall windows; deep teal against warm gold.
 
-The image itself was made fresh for this round: a new render of the same frame-break idea, generated and resized inside the build session, so the entry the judge sees is the one this entry's own transcript produced.
+Why this picture, against the judge's rubric:
 
-## How it runs
+- **Jolt / awe** — a whale the size of the room where a painting should be, jaws open, inches from the viewer. Scale shock in the first second.
+- **Surprise** — art coming alive and breaking its own frame: the painted sea stays flat while the real sea floods the gallery floor.
+- **Momentum** — the lunge drives straight at the viewer; the boy's raised arm echoes it; spray, splinters and water fly outward in every direction.
+- **Craft** — clean photoreal rendering, no text anywhere, so nothing can be misread or garbled.
+- **Reads small** — one whale, one frame, one reaching arm: the idea survives a thumbnail.
+
+The image in this round is a fresh render: generated and resized inside the v7 build session, so the entry the judge sees is the one this entry's own transcript produced. Earlier rounds used the same frame-break idea with a side-on breach; this round re-renders it head-on, jaws open, so the whale meets the viewer instead of passing across the frame.
+
+## Running it
 
 ```sh
 mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
 
-`main.ts` needs Node 22+ and nothing else — stdlib only. It copies `entry.png` to `$MAKEFUN_OUTPUT_DIR/entry.png`, refuses anything over the competition gate (1 MiB, 1024×1024), checks the file is a whole JPEG — Start-Of-Frame dimensions in range and an End-Of-Image marker at the tail — and verifies the copy byte-for-byte with sha256 before exiting. Run it twice and you get the same bytes twice.
+`main.ts` needs Node 22+ and nothing else — stdlib only. It reads `entry.png`, refuses anything outside the competition gate (whole JPEG, at most 1 MiB and 1024×1024 px — Start-Of-Frame dimensions in range, End-Of-Image marker at the tail), writes the exact bytes to `$MAKEFUN_OUTPUT_DIR/entry.png`, and verifies the copy byte-for-byte with sha256 before exiting 0. Run it twice and you get the same bytes twice.
 
 ---
 
