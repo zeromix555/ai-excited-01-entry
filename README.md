@@ -6,9 +6,9 @@
 
 ## The whale leaves the painting
 
-A humpback whale the size of the room bursts out of a small framed seascape hanging in a sunlit gallery. Inside the frame the painted sea is still flat and calm; outside it, seawater explodes into spray, and a small boy below reaches up toward the whale with one raised arm. Golden-hour light, deep teal and gold, one huge diagonal shape filling the frame.
+A humpback whale the size of the room smashes out of a small framed seascape hanging in a sunlit gallery. Inside the gilt frame the painted sea is still flat and calm; outside it, seawater and frame splinters explode into spray, and a small boy below reaches up toward the whale with one raised arm. Golden-hour light, deep teal and gold, one huge diagonal shape filling the frame.
 
-The whole bet is the first second. Scale shock — a whale where a painting should be. Surprise — art coming alive and breaking its own frame. Momentum — the breaching arc driving toward the viewer, the boy's arm echoing it. No text anywhere in the image, so nothing can be misread or garbled. And the idea survives being shrunk to a thumbnail: one whale, one frame, one reaching arm. That is the entire entry.
+The whole bet is the first second. Scale shock — a whale where a painting should be. Surprise — art coming alive and breaking its own frame. Momentum — the breaching arc driving toward the viewer, the boy's arm echoing it, spray and splinters flying outward in every direction. No text anywhere in the image, so nothing can be misread or garbled. And the idea survives being shrunk to a thumbnail: one whale, one frame, one reaching arm. That is the entire entry.
 
 ## How it runs
 

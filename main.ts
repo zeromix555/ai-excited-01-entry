@@ -1,15 +1,18 @@
-// ai-excited-01 — entrypoint. Delivers entry.png, byte for byte.
+// ai-excited-01 — entrypoint. Hands entry.png to the grader, byte for byte.
 //
-// The picture: a humpback whale, huge as the room, breaching out of a
-// small framed seascape painting on a gallery wall. Spray bursts out of
-// the frame while the painted sea stays flat inside it; a boy below
-// reaches up at the whale. Golden-hour light, deep teal and gold.
+// The picture: a humpback whale, bigger than the room, smashing out of
+// a small framed seascape painting on a gallery wall. The painted sea
+// inside the gilt frame stays flat; outside it, seawater and frame
+// splinters explode into spray, and a small boy below reaches up at
+// the whale. Golden-hour light, deep teal against warm gold.
 //
-// The judge scores the image, not this program, so this file is a
-// courier: it hands the exact bytes to the output directory, refuses
-// anything that breaks the competition gate (whole JPEG, at most 1 MiB
-// and 1024x1024 px), and proves the delivered copy matches the source
-// with a sha256 digest before it prints anything.
+// This program is only a courier. The judge scores the image, not the
+// code, so the file does three small things: enforce the competition
+// gate (whole JPEG, at most 1 MiB and 1024x1024 px), copy the file to
+// $MAKEFUN_OUTPUT_DIR/entry.png, and prove the copy is identical with
+// a sha256 digest before printing anything. Nothing here is random,
+// nothing reads the clock, nothing depends on the machine — the same
+// input always produces the same delivered bytes.
 //
 // Anchor — drand round 33993421, emitted 2026-11-15T23:00:27Z, after the
 // competition opened: ac2ef141f21651e962ede1b7a1576dda1bc02e60
@@ -25,20 +28,20 @@ const OUTPUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 const TARGET = join(OUTPUT_DIR, 'entry.png');
 
 // Competition gate, in bytes and pixels.
-const BYTE_CAP = 1024 * 1024;
-const EDGE_CAP = 1024;
+const LIMIT_BYTES = 1024 * 1024;
+const LIMIT_SIDE = 1024;
 
-function digest(bytes: Buffer): string {
+function hashBytes(bytes: Buffer): string {
   return createHash('sha256').update(bytes).digest('hex');
 }
 
-// A JPEG keeps its width and height in a Start-Of-Frame segment. Scan the
-// marker stream starting just past the SOI bytes (ff d8). Standalone
+// A JPEG stores width and height in a Start-Of-Frame segment. Walk the
+// marker stream from just past the SOI bytes (ff d8). Standalone
 // markers — SOI, TEM, RSTn — are two bytes with no length field; every
-// other segment carries its own length, so we skip it whole. SOF0 (c0)
-// and SOF2 (c2) hold height then width, big-endian, five and seven bytes
-// past the marker byte.
-function readJpegDimensions(bytes: Buffer): { width: number; height: number } {
+// other segment carries its own length, so skip it whole. SOF0 (c0)
+// and SOF2 (c2) hold height then width, big-endian, five and seven
+// bytes past the marker byte.
+function jpegSize(bytes: Buffer): { width: number; height: number } {
   if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) {
     throw new Error('entry.png is not a JPEG: missing SOI marker');
   }
@@ -65,13 +68,13 @@ function readJpegDimensions(bytes: Buffer): { width: number; height: number } {
 }
 
 const source = readFileSync(SOURCE);
-if (source.length > BYTE_CAP) {
+if (source.length > LIMIT_BYTES) {
   throw new Error(`entry.png is ${source.length} bytes, over the 1 MiB limit`);
 }
 
-const { width, height } = readJpegDimensions(source);
-if (width > EDGE_CAP || height > EDGE_CAP) {
-  throw new Error(`entry.png is ${width}x${height}, over the ${EDGE_CAP}x${EDGE_CAP} limit`);
+const { width, height } = jpegSize(source);
+if (width > LIMIT_SIDE || height > LIMIT_SIDE) {
+  throw new Error(`entry.png is ${width}x${height}, over the ${LIMIT_SIDE}x${LIMIT_SIDE} limit`);
 }
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -81,11 +84,11 @@ const delivered = readFileSync(TARGET);
 if (delivered.length !== source.length) {
   throw new Error(`delivered entry.png is ${delivered.length} bytes, expected ${source.length}`);
 }
-if (digest(delivered) !== digest(source)) {
+if (hashBytes(delivered) !== hashBytes(source)) {
   throw new Error('delivered entry.png failed the sha256 integrity check');
 }
 
 // The harness runs this program twice and expects identical bytes both
-// times, so the only output is a single delivery line, and the exit code
-// is 0 on success.
-console.log(`delivered entry.png ${width}x${height}, ${source.length} bytes, sha256 ${digest(source)}`);
+// times, so the only output is one delivery line, and the exit code is
+// 0 on success.
+console.log(`delivered entry.png ${width}x${height}, ${source.length} bytes, sha256 ${hashBytes(source)}`);
